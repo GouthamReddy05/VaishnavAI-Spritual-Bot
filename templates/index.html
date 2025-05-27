@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SanathanAI Spiritual Assistant</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+
+  #chat-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/static/image.jpeg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.4; /* Low opacity */
+  z-index: 0;
+  pointer-events: none;
+}
+
+#chat-box > * {
+  position: relative;
+  z-index: 10; /* Ensures content is above the background */
+}
+
+  #chat-input {
+    height: 4.5rem;
+    max-height: 4.5rem;
+    overflow-y: auto;
+    resize: none;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    font-size: 1.125rem;
+    font-weight: 500;
+    background-color: #4b5563;
+    color: white;
+    border: none;
+    outline: none;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  }
+  #chat-container {
+    scroll-behavior: smooth;
+  }
+  #chat-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  #chat-container::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+  #chat-container::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+  }
+  .fade-in {
+    animation: fadeIn 0.3s ease forwards;
+    opacity: 0;
+  }
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+</style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
+
+
+  <!-- Centered chat box -->
+<div id="chat-box" class="relative flex flex-col w-full max-w-full sm:max-w-xl lg:max-w-4xl h-[80vh] bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mx-2 sm:mx-auto">
+
+    <!-- Header -->
+     
+    <header
+      class="bg-gradient-to-r from-teal-600 to-cyan-500 text-white px-6 py-4 font-bold text-2xl tracking-wide shadow-md select-none flex items-center justify-between"
+    >
+      <span>VaishnavAI Spiritual Assistant</span>
+
+        <div class="flex gap-4 items-center">
+    <!-- New Scripture dropdown -->
+    <select
+      id="scripture-select"
+      class="bg-indigo-600 text-white rounded-md px-3 py-1 text-sm font-semibold shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+    >
+      <option value="both" selected>Both</option>
+      <option value="ramayana">Ramayana</option>
+      <option value="bhagavatam">Bhagavatam</option>
+    </select>
+
+    <!-- Existing Language dropdown -->
+    <select
+      id="language-select"
+      class="bg-indigo-600 text-white rounded-md px-3 py-1 text-sm font-semibold shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+    >
+      <option value="english" selected>English</option>
+      <option value="telugu">Telugu</option>
+      <option value="hindi">Hindi</option>
+    </select>
+  </div>
+
+    </header>
+
+    <!-- Chat messages -->
+    <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col"></div>
+
+    <!-- Input -->
+    <form id="chat-form" class="bg-gray-700 p-6 flex gap-4 items-center">
+      <textarea
+        id="chat-input"
+        rows="1"
+        placeholder="Drop your query..."
+        class="flex-1 resize-none rounded-xl px-4 py-3 text-white bg-gray-600 placeholder-gray-300 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-md"
+        autocomplete="off"
+        required
+      ></textarea>
+      <button
+        type="submit"
+        class="bg-indigo-600 hover:bg-indigo-700 transition rounded-xl px-6 py-3 font-semibold text-white shadow-lg"
+        aria-label="Send message"
+      >
+        Send
+      </button>
+    </form>
+  </div>
+
+<script>
+  const chatContainer = document.getElementById('chat-container');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const languageSelect = document.getElementById('language-select');
+  let currentLanguage = languageSelect.value;
+
+  languageSelect.addEventListener('change', () => {
+    currentLanguage = languageSelect.value;
+  });
+
+  function addMessage(message, sender) {
+    const messageEl = document.createElement('div');
+    messageEl.classList.add(
+      'max-w-[70%]',
+      'p-4',
+      'rounded-2xl',
+      'break-words',
+      'whitespace-pre-wrap',
+      'fade-in'
+    );
+
+    if (sender === 'user') {
+      messageEl.classList.add(
+        'bg-gradient-to-tr',
+        'from-blue-600',
+        'to-blue-500',
+        'text-white',
+        'self-end',
+        'rounded-br-none',
+        'shadow-lg'
+      );
+    } else {
+      messageEl.classList.add(
+        'bg-gradient-to-tr',
+        'from-gray-700',
+        'to-gray-600',
+        'text-gray-200',
+        'self-start',
+        'rounded-bl-none',
+        'shadow-inner'
+      );
+    }
+
+    messageEl.textContent = message;
+    chatContainer.appendChild(messageEl);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    addMessage(userMessage, 'user');
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    chatInput.focus();
+
+    fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: userMessage,
+        language: currentLanguage
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      addMessage(data.response || '⚠️ No response from bot.', 'bot');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      addMessage('⚠️ Failed to get response from server.', 'bot');
+    });
+  });
+</script>
+
+</body>
+</html>
