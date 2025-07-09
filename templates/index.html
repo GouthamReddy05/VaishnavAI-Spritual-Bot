@@ -15,14 +15,14 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  opacity: 0.4; /* Low opacity */
+  opacity: 0.4;
   z-index: 0;
   pointer-events: none;
 }
 
 #chat-box > * {
   position: relative;
-  z-index: 10; /* Ensures content is above the background */
+  z-index: 10;
 }
 
   #chat-input {
@@ -68,10 +68,8 @@
 <body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
 
 
-  <!-- Centered chat box -->
 <div id="chat-box" class="relative flex flex-col w-full max-w-full sm:max-w-xl lg:max-w-4xl h-[80vh] bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mx-2 sm:mx-auto">
 
-    <!-- Header -->
      
     <header
       class="bg-gradient-to-r from-teal-600 to-cyan-500 text-white px-6 py-4 font-bold text-2xl tracking-wide shadow-md select-none flex items-center justify-between"
@@ -79,7 +77,6 @@
       <span>VaishnavAI Spiritual Assistant</span>
 
         <div class="flex gap-4 items-center">
-    <!-- New Scripture dropdown -->
     <select
       id="scripture-select"
       class="bg-indigo-600 text-white rounded-md px-3 py-1 text-sm font-semibold shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
@@ -89,7 +86,6 @@
       <option value="bhagavatam">Bhagavatam</option>
     </select>
 
-    <!-- Existing Language dropdown -->
     <select
       id="language-select"
       class="bg-indigo-600 text-white rounded-md px-3 py-1 text-sm font-semibold shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
@@ -102,10 +98,8 @@
 
     </header>
 
-    <!-- Chat messages -->
     <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col"></div>
 
-    <!-- Input -->
     <form id="chat-form" class="bg-gray-700 p-6 flex gap-4 items-center">
       <textarea
         id="chat-input"

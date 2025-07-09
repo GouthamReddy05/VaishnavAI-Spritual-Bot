@@ -54,10 +54,8 @@ def build_index(base_path="Main_f"):
 
     print(f"✅ Indexed {len(metadata1)} verses.")
 
-    # Save FAISS index
     faiss.write_index(index1, "bhagavatam_faiss.index")
 
-    # Save metadata to JSON
     with open("bhagavatam_metadata.json", "w") as f:
         json.dump(metadata1, f, indent=2)
 
@@ -67,14 +65,11 @@ def build_index(base_path="Main_f"):
     with open("Valmiki_Ramayan_Shlokas.json", 'r') as file:
         ramayan = json.load(file)
 
-    # Extract all texts
     texts = [verse['transliteration'] for verse in ramayan if verse.get('transliteration')]
 
-    # Batch encode
     print("Encoding shlokas... (this will take time)")
     embeddings = model.encode(texts, batch_size=32, show_progress_bar=True)
 
-    # Add to FAISS index and metadata
     i = 0
     for verse in ramayan:
         text = verse.get('transliteration')
@@ -98,10 +93,8 @@ def build_index(base_path="Main_f"):
 
     print(f"✅ Indexed {len(metadata2)} verses.")
 
-    # Save FAISS index
     faiss.write_index(index2, "ramayan_faiss.index")
 
-    # Save metadata to JSON
     with open("ramayan_metadata.json", "w") as f:
         json.dump(metadata2, f, indent=2)
 
