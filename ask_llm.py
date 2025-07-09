@@ -17,15 +17,23 @@ gemini_model = genai.GenerativeModel('gemini-1.5-flash')
 emb_model = SentenceTransformer('intfloat/e5-large-v2')
 
 
-index = faiss.read_index("verse_faiss.index")
+def load_index_and_metadata(scripture):
+    index_path = f"{scripture}_faiss.index"
+    metadata_path = f"{scripture}_metadata.json"
+    if not os.path.exists(index_path) or not os.path.exists(metadata_path):
+        raise FileNotFoundError(f"Missing FAISS index or metadata for {scripture}")
+    index = faiss.read_index(index_path)
+    with open(metadata_path, 'r') as f:
+        metadata = json.load(f)
+    return index, metadata
 
-with open("verse_metadata.json", 'r') as f:
-    metadata = json.load(f)
 
 
 
+def search_faiss(query, tok_k = 5, scripture='ramayan'):
+    
+    index, metadata = load_index_and_metadata(scripture)
 
-def search_faiss(query, tok_k = 5):
 
     ## Changes the shape of the array to have 1 row and as many columns as needed
     query_emb = emb_model.encode(query).astype(np.float32).reshape(1, -1)
