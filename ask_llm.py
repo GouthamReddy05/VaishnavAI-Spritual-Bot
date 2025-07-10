@@ -2,24 +2,26 @@ import faiss
 import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
-import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from openai import OpenAI
+from together import Together
 
-load_dotenv()  # Loads variables from .env into environment variables
 
+load_dotenv()
 
+client = Together(api_key = os.getenv('api_key'))  # Set your Together API key
 
-api_key = os.getenv('gemini_api_key')
-genai.configure(api_key=api_key)
-gemini_model = genai.GenerativeModel('gemini-1.5-flash')
-
-emb_model = SentenceTransformer('intfloat/e5-large-v2')
+emb_model = SentenceTransformer("intfloat/e5-large-v2")
 
 
 def load_index_and_metadata(scripture):
-    index_path = f"{scripture}_faiss.index"
-    metadata_path = f"{scripture}_metadata.json"
+    if scripture == 'Ramayana':
+        index_path = 'ramayan_faiss.index'
+        metadata_path = 'ramayan_metadata.json'
+    else:
+        index_path = 'bhagavatam_faiss.index'
+        metadata_path = 'bhagavatam_metadata.json'
     if not os.path.exists(index_path) or not os.path.exists(metadata_path):
         raise FileNotFoundError(f"Missing FAISS index or metadata for {scripture}")
     index = faiss.read_index(index_path)
@@ -31,7 +33,7 @@ def load_index_and_metadata(scripture):
 
 
 def search_faiss(query, tok_k = 5, scripture='ramayan'):
-    
+
     index, metadata = load_index_and_metadata(scripture)
 
 
@@ -40,7 +42,7 @@ def search_faiss(query, tok_k = 5, scripture='ramayan'):
     D, I = index.search(query_emb, tok_k)
 
     ## D is numpy array [1, top_k] shape contains dist betw query vector and each of top_k nearest vectors
-    ## I is numpy array [1, top_k] shape containing indices
+    ## I is numpy array of 2D shape containing indices [[1, 2, 0]]
     results = []
 
     for dist, idx in zip(D[0], I[0]):
@@ -52,28 +54,27 @@ def search_faiss(query, tok_k = 5, scripture='ramayan'):
     return results 
 
 
-def build_context(verses):
+# def build_context(verses):
 
-    if not verses:
-        return ""
+#     if not verses:
+#         return ""
 
-    context = []
+#     context = []
 
-    for v in verses:
-        if 'canto_no' in v and 'chapter_no' in v and 'verse_id' in v:
-            context.append(
-                f"Canto {v['canto_no']}, Chapter {v['chapter_no']}, Verse {v['verse_id']}:\n{v['text']}"
-            )
-        elif 'kanda' in v and 'sarga' in v and 'shloka_id' in v:
+#     for v in verses:
+#         if 'canto_no' in v and 'chapter_no' in v and 'verse_id' in v:
+#             context.append(
+#                 f"Canto {v['canto_no']}, Chapter {v['chapter_no']}, Verse {v['verse_id']}:\n{v['text']}"
+#             )
+#         elif 'kanda' in v and 'sarga' in v and 'shloka_id' in v:
 
-            context.append(
-                f"Kanda {v['kanda']}, Sarga {v['sarga']}, Shloka {v['shloka_id']}:\n{v['text']}"
-            )
-    return "\n\n".join(context)
+#             context.append(
+#                 f"Kanda {v['kanda']}, Sarga {v['sarga']}, Shloka {v['shloka_id']}:\n{v['text']}"
+#             )
+#     return "\n\n".join(context)
 
 
 def ask_llm(query, context):
-
     if context:
         prompt = f"""
 Here is some context that may help answer the question:
@@ -82,8 +83,7 @@ Here is some context that may help answer the question:
 Question: {query}
 
 You are an expert on ancient Indian scriptures, especially the Ramayana.
-Answer the following question based on your knowledge of the Ramayana and based on the given context:
-
+if context is not relevant, answer based on your knowledge of the query.
 Answer:"""
     else:
         prompt = f"""
@@ -93,8 +93,22 @@ Question: {query}
 
 Answer:"""
 
+
     try:
-        response = gemini_model.generate_content(prompt)
-        return response.text.strip()
+        
+        response = client.chat.completions.create(
+        model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt}
+    ],
+    temperature=0.7,
+    max_tokens=200,
+)
+
+        return response.choices[0].message.content.strip()
+
+
     except Exception as e:
         return f"⚠️ Error generating response: {str(e)}"
+

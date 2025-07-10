@@ -1,0 +1,11 @@
+Flask
+gunicorn
+faiss-cpu
+sentence-transformers
+google-generativeai
+python-dotenv
+numpy
+deep_translator
+flask_cors
+openai
+ollama
