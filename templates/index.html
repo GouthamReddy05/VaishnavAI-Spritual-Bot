@@ -7,6 +7,35 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 
+  .typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ccc;
+  border-radius: 50%;
+  animation: blink 1.4s infinite both;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+
   #chat-box::before {
   content: "";
   position: absolute;
@@ -123,13 +152,14 @@
   const chatForm = document.getElementById('chat-form');
   const chatInput = document.getElementById('chat-input');
   const languageSelect = document.getElementById('language-select');
+  const sendButton = chatForm.querySelector('button[type="submit"]');
   let currentLanguage = languageSelect.value;
 
   languageSelect.addEventListener('change', () => {
     currentLanguage = languageSelect.value;
   });
 
-  function addMessage(message, sender) {
+  function addMessage(message, sender, isTemporary = false) {
     const messageEl = document.createElement('div');
     messageEl.classList.add(
       'max-w-[70%]',
@@ -162,9 +192,29 @@
       );
     }
 
-    messageEl.textContent = message;
+    if (typeof message === 'string') {
+      messageEl.textContent = message;
+    } else {
+      messageEl.appendChild(message); // For typing bubble
+    }
+
     chatContainer.appendChild(messageEl);
     chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    return isTemporary ? messageEl : null;
+  }
+
+  function createTypingBubble() {
+    const bubble = document.createElement('div');
+    bubble.classList.add('typing');
+
+    for (let i = 0; i < 3; i++) {
+      const dot = document.createElement('div');
+      dot.classList.add('typing-dot');
+      bubble.appendChild(dot);
+    }
+
+    return bubble;
   }
 
   chatForm.addEventListener('submit', (e) => {
@@ -174,8 +224,12 @@
 
     addMessage(userMessage, 'user');
     chatInput.value = '';
-    chatInput.style.height = 'auto';
     chatInput.focus();
+    sendButton.disabled = true;
+    sendButton.textContent = 'Sending...';
+
+    const typingBubble = createTypingBubble();
+    const typingMessage = addMessage(typingBubble, 'bot', true);
 
     fetch('/chat', {
       method: 'POST',
@@ -187,14 +241,21 @@
     })
     .then(response => response.json())
     .then(data => {
+      typingMessage.remove();
       addMessage(data.response || '⚠️ No response from bot.', 'bot');
     })
     .catch(error => {
+      typingMessage.remove();
       console.error('Error:', error);
       addMessage('⚠️ Failed to get response from server.', 'bot');
+    })
+    .finally(() => {
+      sendButton.disabled = false;
+      sendButton.textContent = 'Send';
     });
   });
 </script>
+
 
 </body>
 </html>

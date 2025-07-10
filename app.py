@@ -2,9 +2,9 @@ from flask import Flask, render_template, request, jsonify
 from ask_llm import search_faiss, ask_llm
 from deep_translator import GoogleTranslator
 from flask_cors import CORS
+from langdetect import detect, DetectorFactory
 import os
-
-
+DetectorFactory.seed = 0 
 app = Flask(__name__)
 CORS(app)
 
@@ -28,6 +28,14 @@ def chat():
 
     if not user_query or user_query.strip() == "":
         return jsonify({'response': '⚠️ Please enter something to ask.'})
+
+    try:
+        detected_lang = detect(user_query)
+    except:
+        detected_lang = 'en'  
+    
+    if detected_lang != 'en':
+        user_query = GoogleTranslator(source='auto', target='en').translate(user_query)
 
     if user_query:
         retrieved_verses = search_faiss(user_query, tok_k=5, scripture=scripture)
