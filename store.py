@@ -29,7 +29,7 @@ def build_index(base_path="Bhagavatam"):
         chapter_f = [f for f in os.listdir(canto_path) if f.endswith('.json')]
 
         for chapter_file in chapter_f:
-            # chapter_no = chapter_file.split('_')[-1].replace('.json', '')
+            chapter_no = chapter_file.split('_')[-1].replace('.json', '')
             chapter_path = os.path.join(canto_path, chapter_file)
             print(f"  📖 Processing {chapter_file}...")
 
@@ -46,7 +46,7 @@ def build_index(base_path="Bhagavatam"):
 
                 emb = model.encode(text)
                 index1.add(np.array([emb], dtype=np.float32))
-                # text = text.encode('utf-8', 'ignore').decode('utf-8')
+                text = text.encode('utf-8', 'ignore').decode('utf-8')
                 metadata1.append({
                     "source" : "bhagavatam",
                     "canto_no": number,
