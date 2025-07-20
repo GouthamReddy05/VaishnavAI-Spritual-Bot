@@ -83,19 +83,22 @@ def build_index(base_path="Bhagavatam"):
 
         emb = embeddings[i]
         index2.add(np.array([emb], dtype=np.float32))
+        text_transliterate = transliterate(text, DEVANAGARI, IAST)
+        trans = unicodedata.normalize("NFC", verse.get('translation') or "")
         normalized_sloka = unicodedata.normalize("NFC", verse.get('shloka_text'))
         metadata2.append({
             "source" : "ramayan",
             "kanda": verse.get('kanda'),
             "sarga": verse.get('sarga'),
             "shloka_id": verse.get('shloka'),   
-            "shloka_text": normalized_sloka,        
+            "transliteration": text_transliterate or "",
+            "translation": trans or "",
+            "explanation": verse.get('explanation') or "",
+            "shloka_text": normalized_sloka,
+                    
         })
         i += 1
         
-
-        
-
 
 
 
@@ -114,7 +117,7 @@ build_index()
 # with open("ramayan_metadata.json", "r", encoding='utf-8') as f:
 #     ramayan_metadata = json.load(f)
 
-# print(ramayan_metadata[0]['shloka_text'])
+# print(ramayan_metadata[0]['transliteration'])
 
 
 # with open("bhagavatam_metadata.json", "r", encoding='utf-8') as f:

@@ -38,11 +38,11 @@ def chat():
         user_query = GoogleTranslator(source='auto', target='en').translate(user_query)
 
     if user_query:
-        retrieved_verses = search_faiss(user_query, tok_k=5, scripture=scripture)
+        retrieved_verses = search_faiss(user_query, tok_k=20, scripture=scripture)
 
         if retrieved_verses:
-            context = build_context(retrieved_verses)
-        response = ask_llm(user_query, retrieved_verses, context) 
+            context = build_context(retrieved_verses, scripture)
+        response = ask_llm(user_query, scripture, context) 
         
 
     tar_lang = language_codes.get(language.lower())

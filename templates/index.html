@@ -66,8 +66,8 @@
     background-color: #4b5563;
     color: white;
     border: none;
-    outline: none;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    /* outline: none; */
+    /* box-shadow: 0 0 10px rgba(99, 102, 241, 0.5); */
   }
   #chat-container {
     scroll-behavior: smooth;
@@ -129,14 +129,16 @@
     <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col"></div>
 
     <form id="chat-form" class="bg-gray-700 p-6 flex gap-4 items-center">
-      <textarea
-        id="chat-input"
-        rows="1"
-        placeholder="Drop your query..."
-        class="flex-1 resize-none rounded-xl px-4 py-3 text-white bg-gray-600 placeholder-gray-300 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-md"
-        autocomplete="off"
-        required
-      ></textarea>
+     <textarea
+  id="chat-input"
+  rows="1"
+  placeholder="Type your message..."
+  class="flex-1 resize-none rounded-xl px-4 py-3 bg-[#40414f] text-gray-200 placeholder-gray-400 text-base font-normal focus:outline-none focus:ring-2 focus:ring-gray-600 shadow-inner"
+  style="color: #e5e7eb; font-size: .95rem;"
+  autocomplete="off"
+  required
+></textarea>
+
       <button
         type="submit"
         class="bg-indigo-600 hover:bg-indigo-700 transition rounded-xl px-6 py-3 font-semibold text-white shadow-lg"
@@ -173,24 +175,24 @@
     if (sender === 'user') {
       messageEl.classList.add(
         'bg-gradient-to-tr',
-        'from-blue-600',
-        'to-blue-500',
-        'text-white',
-        'self-end',
-        'rounded-br-none',
-        'shadow-lg'
+    'from-gray-700',
+    'to-gray-600',
+    'text-gray-200',
+    'self-end',
+    'rounded-bl-none',
+    'shadow-inner'
       );
     } else {
-      messageEl.classList.add(
-        'bg-gradient-to-tr',
-        'from-gray-700',
-        'to-gray-600',
-        'text-gray-200',
-        'self-start',
-        'rounded-bl-none',
-        'shadow-inner'
-      );
-    }
+    messageEl.classList.add(
+    'bg-gradient-to-tr',
+    'from-gray-700',
+    'to-gray-600',
+    'text-gray-200',
+    'self-start',
+    'rounded-bl-none',
+    'shadow-inner'
+  );
+}
 
     if (typeof message === 'string') {
       messageEl.textContent = message;
