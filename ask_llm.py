@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from together import Together
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+
 
 load_dotenv()
 
@@ -32,7 +35,7 @@ def load_index_and_metadata(scripture):
 
 
 
-def search_faiss(query, tok_k = 5, scripture='ramayan'):
+def search_faiss(query, tok_k = 5, scripture='bhagavatam'):
 
     index, metadata = load_index_and_metadata(scripture)
 
@@ -50,37 +53,44 @@ def search_faiss(query, tok_k = 5, scripture='ramayan'):
             results.append(metadata[idx])
         # else:
         #     return []
+        print(metadata[idx])
 
     return results 
 
 
-# def build_context(verses):
+def build_context(verses):
 
-#     if not verses:
-#         return ""
+    if not verses:
+        return ""
 
-#     context = []
+    context = []
 
-#     for v in verses:
-#         if 'canto_no' in v and 'chapter_no' in v and 'verse_id' in v:
-#             context.append(
-#                 f"Canto {v['canto_no']}, Chapter {v['chapter_no']}, Verse {v['verse_id']}:\n{v['text']}"
-#             )
-#         elif 'kanda' in v and 'sarga' in v and 'shloka_id' in v:
+    for v in verses:
+        if 'canto_no' in v and 'chapter_no' in v and 'verse_id' in v:
+            context.append(
+                f"Canto {v['canto_no']}, Chapter {v['chapter_no']}, Verse {v['verse_id']}:\n{v['text']}"
+            )
+        elif 'kanda' in v and 'sarga' in v and 'shloka_id' in v:
 
-#             context.append(
-#                 f"Kanda {v['kanda']}, Sarga {v['sarga']}, Shloka {v['shloka_id']}:\n{v['text']}"
-#             )
-#     return "\n\n".join(context)
+            context.append(
+                f"Kanda {v['kanda']}, Sarga {v['sarga']}, Shloka {v['shloka_id']}:\n{v['text']}"
+            )
+    return "\n\n".join(context)
 
 
-def ask_llm(query, context):
+def ask_llm(query, context, verses):
     if context:
         prompt = f"""
-Here is some context that may help answer the question:
+Here is some context and some verses that may help answer the question:
 {context}
 
 Question: {query}
+# Instructions:
+# - {verses}\nChoose only one verse from the given verses that best answers the question.
+# - Mention which verse (e.g., Kanda X, Sarga Y, Shloka Z) you are using.
+# - Then explain the answer briefly and clearly.
+# - If none of the verses are directly relevant, answer based on your own knowledge.
+
 
 You are an expert on ancient Indian scriptures, especially the Ramayana.
 if context is not relevant, answer based on your knowledge of the query.
@@ -103,7 +113,7 @@ Answer:"""
         {"role": "user", "content": prompt}
     ],
     temperature=0.7,
-    max_tokens=200,
+    # max_tokens=200,
 )
 
         return response.choices[0].message.content.strip()
@@ -112,3 +122,13 @@ Answer:"""
     except Exception as e:
         return f"⚠️ Error generating response: {str(e)}"
 
+
+
+query = "Why did Lord Krishna lift the Govardhana Hill, and what is the spiritual significance of this event in the Bhagavatam?"
+
+context = search_faiss(query, tok_k=5, scripture='bhagavatam')
+# verses = build_context(context)
+
+# ans = ask_llm(query, context, verses)
+
+# print(ans)

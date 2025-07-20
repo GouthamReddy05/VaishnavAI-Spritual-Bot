@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from ask_llm import search_faiss, ask_llm
+from ask_llm import search_faiss, ask_llm, build_context
 from deep_translator import GoogleTranslator
 from flask_cors import CORS
 from langdetect import detect, DetectorFactory
@@ -40,7 +40,9 @@ def chat():
     if user_query:
         retrieved_verses = search_faiss(user_query, tok_k=5, scripture=scripture)
 
-        response = ask_llm(user_query, retrieved_verses) 
+        if retrieved_verses:
+            context = build_context(retrieved_verses)
+        response = ask_llm(user_query, retrieved_verses, context) 
         
 
     tar_lang = language_codes.get(language.lower())
